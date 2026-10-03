@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkRoute Africa - Stories Have No Single Route</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Crisp Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark': '#0B1510',
+                        'brand-dark-surface': '#0F1913',
+                        'brand-gold': '#C5A059',
+                        'brand-gold-light': '#DFB86C',
+                        'brand-burgundy': '#6E2020',
+                        'brand-burgundy-hover': '#812323',
+                        'parchment': '#EAE3D9',
+                        'parchment-light': '#F4EFE6',
+                        'parchment-card': '#E2DAD0',
+                    },
+                    fontFamily: {
+                        cormorant: ['"Cormorant Garamond"', 'serif'],
+                        cinzel: ['Cinzel', 'serif'],
+                        montserrat: ['Montserrat', 'sans-serif'],
+                        script: ['"Alex Brush"', 'cursive'],
+                    },
+                    backgroundImage: {
+                        'hero-pattern': "linear-gradient(to bottom, rgba(11, 21, 16, 0.75), rgba(11, 21, 16, 0.95)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2000&auto=format&fit=crop')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom aesthetics and visual depth */
+        body {
+            background-color: #0B1510;
+            color: #E2DAD0;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Particles / Atmosphere canvas positioning */
+        #ambient-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B1510;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C5A059;
+            border-radius: 4px;
+        }
+
+        /* Ink Stain & Gold Dust effect */
+        .gold-glow {
+            text-shadow: 0 0 15px rgba(197, 160, 89, 0.3);
+        }
+
+        .gold-border-glow {
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.15);
+        }
+
+        /* Torn Paper Top Edge Simulation */
+        .torn-paper-top {
+            clip-path: polygon(
+                0% 12px, 4% 3px, 9% 10px, 14% 2px, 18% 9px, 23% 1px, 28% 11px, 
+                34% 3px, 39% 12px, 45% 2px, 51% 10px, 57% 4px, 63% 12px, 68% 2px, 
+                74% 9px, 79% 1px, 85% 10px, 91% 3px, 96% 11px, 100% 4px,
+                100% 100%, 0% 100%
+            );
+        }
+
+        .torn-paper-bottom {
+            clip-path: polygon(
+                0% 0%, 100% 0%, 100% calc(100% - 10px),
+                95% calc(100% - 2px), 90% calc(100% - 11px), 84% calc(100% - 3px), 
+                78% calc(100% - 10px), 72% calc(100% - 2px), 66% calc(100% - 12px), 
+                60% calc(100% - 4px), 54% calc(100% - 11px), 48% calc(100% - 2px), 
+                42% calc(100% - 9px), 36% calc(100% - 3px), 30% calc(100% - 12px), 
+                24% calc(100% - 4px), 18% calc(100% - 10px), 12% calc(100% - 2px), 
+                6% calc(100% - 11px), 0% calc(100% - 3px)
+            );
+        }
+
+        /* Card horizontal scroll hide bar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Stamp Rotation Animation */
+        @keyframes rotateStamp {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .stamp-rotate {
+            animation: rotateStamp 35s linear infinite;
+        }
+    </style>
+</head>
+<body class="relative selection:bg-brand-gold selection:text-brand-dark">
+
+    <!-- Ambient Particle Canvas for Hero Visual Depth -->
+    <canvas id="ambient-canvas"></canvas>
+
+    <!-- Header / Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-brand-dark/90 backdrop-blur-md border-b border-brand-gold/20 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center space-x-3 group">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <!-- Africa Map SVG Icon -->
+                    <svg class="w-9 h-9 text-brand-gold fill-current transform group-hover:scale-105 transition-transform duration-300" viewBox="0 0 100 100">
+                        <path d="M48,15 C52,15 57,18 62,20 C67,22 72,20 75,25 C78,30 73,35 76,40 C79,45 85,48 82,55 C79,62 72,65 70,72 C68,79 60,82 55,88 C50,94 45,90 42,85 C39,80 38,72 35,68 C32,64 25,62 24,56 C23,50 30,46 31,40 C32,34 28,30 30,24 C32,18 44,15 48,15 Z" />
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-cinzel tracking-[0.25em] text-lg sm:text-xl text-brand-gold font-bold leading-tight">INKROUTE</span>
+                    <span class="font-cinzel tracking-[0.45em] text-xs text-brand-gold/80 pl-0.5">AFRICA</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8 text-xs font-montserrat tracking-widest text-slate-300">
+                <a href="#home" class="text-brand-gold border-b-2 border-brand-gold pb-1 font-semibold transition-colors">HOME</a>
+                <a href="#bookshelf" class="hover:text-brand-gold transition-colors py-1">BOOKS</a>
+                <a href="#about" class="hover:text-brand-gold transition-colors py-1">CLUB</a>
+                <a href="#discussion" class="hover:text-brand-gold transition-colors py-1">DISCUSSION</a>
+                <a href="#about" class="hover:text-brand-gold transition-colors py-1">ABOUT US</a>
+                <a href="#join" class="hover:text-brand-gold transition-colors py-1">JOIN US</a>
+            </nav>
+
+            <!-- Actions Right -->
+            <div class="flex items-center space-x-4">
+                <button onclick="openModal('joinModal')" class="hidden sm:block bg-brand-burgundy hover:bg-brand-burgundy-hover text-parchment-light text-xs font-montserrat font-semibold tracking-widest px-5 py-2.5 rounded-full transition-all duration-300 shadow-md hover:shadow-brand-burgundy/30 hover:scale-105 uppercase">
+                    JOIN THE CLUB
+                </button>
+                
+                <!-- Night / Atmospheric Toggle -->
+                <button id="themeToggleBtn" title="Toggle Atmospheric Theme" class="p-2 text-brand-gold/80 hover:text-brand-gold hover:bg-brand-gold/10 rounded-full transition-colors">
+                    <i class="fa-regular font-thin fa-moon text-lg"></i>
+                </button>
+
+                <!-- Mobile Menu Toggle Button -->
+                <button id="mobileMenuBtn" class="md:hidden p-2 text-brand-gold focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobileMenu" class="hidden md:hidden bg-brand-dark-surface border-b border-brand-gold/20 px-6 py-6 space-y-4 font-montserrat text-xs tracking-widest">
+            <a href="#home" class="block text-brand-gold font-bold">HOME</a>
+            <a href="#bookshelf" class="block hover:text-brand-gold">BOOKS</a>
+            <a href="#about" class="block hover:text-brand-gold">CLUB</a>
+            <a href="#discussion" class="block hover:text-brand-gold">DISCUSSION</a>
+            <a href="#about" class="block hover:text-brand-gold">ABOUT US</a>
+            <a href="#join" class="block hover:text-brand-gold">JOIN US</a>
+            <button onclick="openModal('joinModal')" class="w-full bg-brand-burgundy text-parchment-light text-center py-3 rounded-full font-semibold">JOIN THE CLUB</button>
+        </div>
+    </header>
+
+    <main class="relative z-10">
+
+        <!-- HERO SECTION -->
+        <section id="home" class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            
+            <!-- Hero Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Title Content -->
+                <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+                    <div class="space-y-3">
+                        <h1 class="font-cormorant text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-parchment-light font-normal leading-[1.05] tracking-tight">
+                            Stories have no<br/>
+                            single <span class="italic font-normal text-brand-gold font-cormorant">route.</span>
+                        </h1>
+                        <!-- Gold Africa Divider Symbol -->
+                        <div class="flex items-center justify-center lg:justify-start space-x-3 pt-2">
+                            <div class="h-[1px] w-12 bg-brand-gold/40"></div>
+                            <svg class="w-5 h-5 text-brand-gold fill-current" viewBox="0 0 100 100">
+                                <path d="M48,15 C52,15 57,18 62,20 C67,22 72,20 75,25 C78,30 73,35 76,40 C79,45 85,48 82,55 C79,62 72,65 70,72 C68,79 60,82 55,88 C50,94 45,90 42,85 C39,80 38,72 35,68 C32,64 25,62 24,56 C23,50 30,46 31,40 C32,34 28,30 30,24 C32,18 44,15 48,15 Z" />
+                            </svg>
+                            <div class="h-[1px] w-12 bg-brand-gold/40"></div>
+                        </div>
+                    </div>
+
+                    <p class="font-montserrat text-sm sm:text-base text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+                        We read to escape, to learn, to feel and to connect.<br class="hidden sm:inline"/>
+                        Welcome to InkRoute Africa Book Club.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-5 pt-2">
+                        <button onclick="openModal('joinModal')" class="w-full sm:w-auto bg-brand-burgundy hover:bg-brand-burgundy-hover text-parchment-light font-montserrat text-xs font-semibold tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-lg shadow-brand-burgundy/20 uppercase">
+                            JOIN THE CLUB
+                        </button>
+                        <a href="#bookshelf" class="w-full sm:w-auto border border-brand-gold/60 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-gold font-montserrat text-xs font-semibold tracking-widest px-8 py-4 rounded-full transition-all duration-300 text-center uppercase">
+                            OUR BOOKSHELF
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Hero Imagery Background Collage Accent -->
+                <div class="lg:col-span-5 relative hidden lg:block">
+                    <div class="relative w-full h-[380px] rounded-2xl overflow-hidden shadow-2xl border border-brand-gold/20">
+                        <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1000&auto=format&fit=crop" alt="Books and coffee cup visual" class="w-full h-full object-cover filter opacity-80 contrast-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent"></div>
+                        <!-- Decorative Cozy Mug Quote Badge -->
+                        <div class="absolute bottom-6 right-6 bg-brand-dark/85 backdrop-blur-md p-4 rounded-xl border border-brand-gold/30 text-right max-w-[200px]">
+                            <p class="font-cormorant italic text-brand-gold text-lg leading-tight">"One more chapter."</p>
+                            <i class="fa-solid fa-heart text-xs text-brand-gold/70 mt-1"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CURRENT READ FLOATING CARD -->
+            <div id="discussion" class="mt-16 sm:mt-24">
+                <div class="bg-parchment-card rounded-2xl p-6 sm:p-10 text-brand-dark shadow-2xl border border-brand-gold/30 relative overflow-hidden">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                        
+                        <!-- Book Cover Column -->
+                        <div class="md:col-span-4 lg:col-span-4 flex justify-center">
+                            <div class="relative group cursor-pointer" onclick="openCurrentReadModal()">
+                                <div class="w-48 sm:w-56 h-72 sm:h-80 rounded-lg overflow-hidden shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-300 border-2 border-brand-gold/40">
+                                    <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1647895180i/60052003.jpg" onerror="this.src='https://placehold.co/400x600/6e2020/ffffff?text=Things+We+Never+Got+Over'" alt="Things We Never Got Over Book Cover" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book Metadata Column -->
+                        <div class="md:col-span-8 lg:col-span-8 space-y-6">
+                            
+                            <div>
+                                <span class="font-montserrat text-xs font-bold tracking-[0.2em] text-brand-dark/60 uppercase">CURRENT READ</span>
+                                <h2 class="font-cormorant text-3xl sm:text-4xl md:text-5xl font-semibold text-brand-dark mt-1 leading-tight">
+                                    Things We Never Got Over
+                                </h2>
+                                <p class="font-cormorant italic text-lg sm:text-xl text-brand-dark/80 mt-1">by Lucy Score</p>
+                            </div>
+
+                            <!-- Star Rating -->
+                            <div class="flex items-center space-x-2">
+                                <div class="flex text-brand-gold text-sm space-x-1">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star-half-stroke"></i>
+                                </div>
+                                <span class="font-montserrat text-xs font-semibold text-brand-dark/70">(4.5)</span>
+                            </div>
+
+                            <p class="font-montserrat text-xs sm:text-sm text-brand-dark/80 leading-relaxed max-w-xl">
+                                A small-town, grumpy sunshine romance that has stolen our hearts. Naomi Witt arrives in Knockemout to rescue her estranged twin, only to be left stranded with a niece she didn't know existed.
+                            </p>
+
+                            <!-- Metadata Info Grid -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 border-t border-brand-dark/10">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-9 h-9 rounded-lg bg-brand-dark/5 flex items-center justify-center text-brand-dark/80">
+                                        <i class="fa-regular fa-calendar-check text-base"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[10px] font-montserrat font-bold tracking-wider uppercase text-brand-dark/60">DISCUSSION DATE</span>
+                                        <span class="font-montserrat text-xs font-medium text-brand-dark">25 May 2024</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-9 h-9 rounded-lg bg-brand-dark/5 flex items-center justify-center text-brand-dark/80">
+                                        <i class="fa-regular fa-heart text-base"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[10px] font-montserrat font-bold tracking-wider uppercase text-brand-dark/60">GENRE</span>
+                                        <span class="font-montserrat text-xs font-medium text-brand-dark">Romance</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-9 h-9 rounded-lg bg-brand-dark/5 flex items-center justify-center text-brand-dark/80">
+                                        <i class="fa-regular fa-bookmark text-base"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[10px] font-montserrat font-bold tracking-wider uppercase text-brand-dark/60">PAGES</span>
+                                        <span class="font-montserrat text-xs font-medium text-brand-dark">430</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-9 h-9 rounded-lg bg-brand-dark/5 flex items-center justify-center text-brand-dark/80">
+                                        <i class="fa-regular fa-star text-base"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[10px] font-montserrat font-bold tracking-wider uppercase text-brand-dark/60">GOODREADS</span>
+                                        <span class="font-montserrat text-xs font-medium text-brand-dark">4.16</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- View Details Button -->
+                            <div class="pt-2">
+                                <button onclick="openCurrentReadModal()" class="bg-brand-dark hover:bg-black text-parchment-light text-xs font-montserrat font-bold tracking-widest px-6 py-3.5 rounded-full transition-all duration-300 shadow-md">
+                                    VIEW BOOK DETAILS
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+        <!-- BOOKSHELF SECTION -->
+        <section id="bookshelf" class="py-16 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            
+            <!-- Section Header -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 space-y-6 md:space-y-0">
+                <div class="space-y-1">
+                    <span class="font-script text-3xl sm:text-4xl text-brand-gold block -mb-3">our</span>
+                    <h2 class="font-cormorant text-4xl sm:text-5xl text-parchment-light font-bold tracking-wider uppercase flex items-center space-x-3">
+                        <span>BOOKSHELF</span>
+                    </h2>
+                    <div class="flex items-center space-x-2 pt-1">
+                        <div class="h-[1px] w-10 bg-brand-gold/50"></div>
+                        <svg class="w-4 h-4 text-brand-gold fill-current" viewBox="0 0 100 100">
+                            <path d="M48,15 C52,15 57,18 62,20 C67,22 72,20 75,25 C78,30 73,35 76,40 C79,45 85,48 82,55 C79,62 72,65 70,72 C68,79 60,82 55,88 C50,94 45,90 42,85 C39,80 38,72 35,68 C32,64 25,62 24,56 C23,50 30,46 31,40 C32,34 28,30 30,24 C32,18 44,15 48,15 Z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="md:text-right max-w-md">
+                    <p class="font-montserrat text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+                        A collection of stories we've read, loved, debated and will never forget.
+                    </p>
+                    <a href="#bookshelf" class="inline-flex items-center text-xs font-montserrat font-semibold tracking-widest text-brand-gold hover:underline mt-2 uppercase">
+                        VIEW ALL BOOKS <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Genre Filter Tabs -->
+            <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar mb-8 pb-2">
+                <button onclick="filterBooks('ALL')" class="genre-btn active-genre bg-brand-gold text-brand-dark font-montserrat text-[11px] font-bold tracking-widest px-4 py-2 rounded-full uppercase transition-all whitespace-nowrap">ALL</button>
+                <button onclick="filterBooks('ROMANCE')" class="genre-btn bg-brand-dark-surface border border-brand-gold/30 hover:border-brand-gold text-slate-300 font-montserrat text-[11px] font-bold tracking-widest px-4 py-2 rounded-full uppercase transition-all whitespace-nowrap">ROMANCE</button>
+                <button onclick="filterBooks('THRILLER')" class="genre-btn bg-brand-dark-surface border border-brand-gold/30 hover:border-brand-gold text-slate-300 font-montserrat text-[11px] font-bold tracking-widest px-4 py-2 rounded-full uppercase transition-all whitespace-nowrap">THRILLER</button>
+                <button onclick="filterBooks('FANTASY')" class="genre-btn bg-brand-dark-surface border border-brand-gold/30 hover:border-brand-gold text-slate-300 font-montserrat text-[11px] font-bold tracking-widest px-4 py-2 rounded-full uppercase transition-all whitespace-nowrap">FANTASY</button>
+                <button onclick="filterBooks('LITERARY')" class="genre-btn bg-brand-dark-surface border border-brand-gold/30 hover:border-brand-gold text-slate-300 font-montserrat text-[11px] font-bold tracking-widest px-4 py-2 rounded-full uppercase transition-all whitespace-nowrap">LITERARY</button>
+            </div>
+
+            <!-- Books Carousel Wrapper -->
+            <div class="relative group">
+                
+                <!-- Left Nav Arrow -->
+                <button id="scrollLeftBtn" class="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-brand-dark/90 border border-brand-gold/50 text-brand-gold flex items-center justify-center hover:bg-brand-gold hover:text-brand-dark transition-all duration-300 shadow-lg">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </button>
+
+                <!-- Horizontal Book Scroll Container -->
+                <div id="booksContainer" class="flex space-x-6 overflow-x-auto no-scrollbar scroll-smooth py-4 px-2">
+                    
+                    <!-- Book 1 -->
+                    <div class="book-card flex-shrink-0 w-60 sm:w-64 bg-brand-dark-surface rounded-2xl p-4 border border-brand-gold/20 hover:border-brand-gold/70 transition-all duration-300 hover:-translate-y-2 cursor-pointer" data-genre="ROMANCE" onclick="openBookModal(0)">
+                        <div class="relative h-80 rounded-xl overflow-hidden shadow-lg mb-4">
+                            <span class="absolute top-3 left-3 bg-brand-burgundy/90 backdrop-blur-sm text-parchment-light font-montserrat text-[10px] font-bold tracking-widest px-3 py-1 rounded-full uppercase z-10">ROMANCE</span>
+                            <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1614002492i/54189398.jpg" onerror="this.src='https://placehold.co/300x450/812323/ffffff?text=Spanish+Love+Deception'" alt="The Spanish Love Deception" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center space-y-1">
+                            <h3 class="font-cormorant text-xl font-bold text-parchment tracking-wide leading-tight line-clamp-1">The Spanish Love Deception</h3>
+                            <p class="font-cormorant italic text-sm text-brand-gold">Elena Armas</p>
+                            <div class="flex justify-center text-brand-gold text-xs space-x-1 pt-2">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book 2 -->
+                    <div class="book-card flex-shrink-0 w-60 sm:w-64 bg-brand-dark-surface rounded-2xl p-4 border border-brand-gold/20 hover:border-brand-gold/70 transition-all duration-300 hover:-translate-y-2 cursor-pointer" data-genre="THRILLER" onclick="openBookModal(1)">
+                        <div class="relative h-80 rounded-xl overflow-hidden shadow-lg mb-4">
+                            <span class="absolute top-3 left-3 bg-brand-dark/90 border border-brand-gold/40 text-parchment-light font-montserrat text-[10px] font-bold tracking-widest px-3 py-1 rounded-full uppercase z-10">THRILLER</span>
+                            <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1582759968i/40092410.jpg" onerror="this.src='https://placehold.co/300x450/1a1a1a/ffffff?text=The+Silent+Patient'" alt="The Silent Patient" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center space-y-1">
+                            <h3 class="font-cormorant text-xl font-bold text-parchment tracking-wide leading-tight line-clamp-1">THE SILENT PATIENT</h3>
+                            <p class="font-cormorant italic text-sm text-brand-gold">Alex Michaelides</p>
+                            <div class="flex justify-center text-brand-gold text-xs space-x-1 pt-2">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book 3 -->
+                    <div class="book-card flex-shrink-0 w-60 sm:w-64 bg-brand-dark-surface rounded-2xl p-4 border border-brand-gold/20 hover:border-brand-gold/70 transition-all duration-300 hover:-translate-y-2 cursor-pointer" data-genre="ROMANCE" onclick="openBookModal(2)">
+                        <div class="relative h-80 rounded-xl overflow-hidden shadow-lg mb-4">
+                            <span class="absolute top-3 left-3 bg-brand-burgundy/90 backdrop-blur-sm text-parchment-light font-montserrat text-[10px] font-bold tracking-widest px-3 py-1 rounded-full uppercase z-10">ROMANCE</span>
+                            <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1688011937i/27362503.jpg" onerror="this.src='https://placehold.co/300x450/6e2020/ffffff?text=It+Ends+With+Us'" alt="It Ends With Us" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center space-y-1">
+                            <h3 class="font-cormorant text-xl font-bold text-parchment tracking-wide leading-tight line-clamp-1">It Ends With Us</h3>
+                            <p class="font-cormorant italic text-sm text-brand-gold">Colleen Hoover</p>
+                            <div class="flex justify-center text-brand-gold text-xs space-x-1 pt-2">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book 4 -->
+                    <div class="book-card flex-shrink-0 w-60 sm:w-64 bg-brand-dark-surface rounded-2xl p-4 border border-brand-gold/20 hover:border-brand-gold/70 transition-all duration-300 hover:-translate-y-2 cursor-pointer" data-genre="FANTASY" onclick="openBookModal(3)">
+                        <div class="relative h-80 rounded-xl overflow-hidden shadow-lg mb-4">
+                            <span class="absolute top-3 left-3 bg-yellow-900/90 border border-brand-gold/40 text-parchment-light font-montserrat text-[10px] font-bold tracking-widest px-3 py-1 rounded-full uppercase z-10">FANTASY</span>
+                            <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1701980900i/61714586.jpg" onerror="this.src='https://placehold.co/300x450/3a2510/ffffff?text=Fourth+Wing'" alt="Fourth Wing" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center space-y-1">
+                            <h3 class="font-cormorant text-xl font-bold text-parchment tracking-wide leading-tight line-clamp-1">FOURTH WING</h3>
+                            <p class="font-cormorant italic text-sm text-brand-gold">Rebecca Yarros</p>
+                            <div class="flex justify-center text-brand-gold text-xs space-x-1 pt-2">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book 5 -->
+                    <div class="book-card flex-shrink-0 w-60 sm:w-64 bg-brand-dark-surface rounded-2xl p-4 border border-brand-gold/20 hover:border-brand-gold/70 transition-all duration-300 hover:-translate-y-2 cursor-pointer" data-genre="LITERARY" onclick="openBookModal(4)">
+                        <div class="relative h-80 rounded-xl overflow-hidden shadow-lg mb-4">
+                            <span class="absolute top-3 left-3 bg-stone-800/90 border border-brand-gold/40 text-parchment-light font-montserrat text-[10px] font-bold tracking-widest px-3 py-1 rounded-full uppercase z-10">LITERARY</span>
+                            <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1448824210i/27071490.jpg" onerror="this.src='https://placehold.co/300x450/4a3828/ffffff?text=Homegoing'" alt="Homegoing" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center space-y-1">
+                            <h3 class="font-cormorant text-xl font-bold text-parchment tracking-wide leading-tight line-clamp-1">Homegoing</h3>
+                            <p class="font-cormorant italic text-sm text-brand-gold">Yaa Gyasi</p>
+                            <div class="flex justify-center text-brand-gold text-xs space-x-1 pt-2">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Nav Arrow -->
+                <button id="scrollRightBtn" class="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-brand-dark/90 border border-brand-gold/50 text-brand-gold flex items-center justify-center hover:bg-brand-gold hover:text-brand-dark transition-all duration-300 shadow-lg">
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+            </div>
+
+        </section>
+
+        <!-- PARCHMENT STRIP SECTION ("more than A BOOK CLUB") -->
+        <section id="about" class="relative my-16 py-16 bg-parchment-light text-brand-dark torn-paper-top torn-paper-bottom shadow-2xl">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Left Copy Column -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div>
+                            <span class="font-script text-3xl sm:text-4xl text-brand-gold block -mb-2">more than</span>
+                            <h2 class="font-cormorant text-4xl sm:text-5xl font-bold text-brand-dark tracking-wide uppercase leading-tight">
+                                A BOOK CLUB
+                            </h2>
+                        </div>
+
+                        <p class="font-montserrat text-xs sm:text-sm text-brand-dark/80 leading-relaxed font-light">
+                            InkRoute Africa is a community for readers and dreamers. We come for the books, stay for the people.
+                        </p>
+
+                        <div>
+                            <button onclick="openModal('storyModal')" class="bg-brand-burgundy hover:bg-brand-burgundy-hover text-parchment-light font-montserrat text-xs font-semibold tracking-widest px-8 py-3.5 rounded-md transition-all duration-300 uppercase shadow-md">
+                                OUR STORY
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Feature Icons Columns + Decorative Seal -->
+                    <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
+                        
+                        <!-- Pillar 1: READ -->
+                        <div class="space-y-3 text-center sm:text-left border-l sm:border-l-0 lg:border-l border-brand-dark/10 sm:pl-0 lg:pl-6">
+                            <div class="w-12 h-12 rounded-full bg-brand-dark/5 flex items-center justify-center text-brand-dark mx-auto sm:mx-0">
+                                <i class="fa-solid fa-book-open text-xl text-brand-dark/80"></i>
+                            </div>
+                            <h3 class="font-cormorant text-xl font-bold tracking-widest uppercase">READ</h3>
+                            <p class="font-montserrat text-xs text-brand-dark/70 leading-relaxed font-light">
+                                We pick books that challenge, heal and inspire us.
+                            </p>
+                        </div>
+
+                        <!-- Pillar 2: DISCUSS -->
+                        <div class="space-y-3 text-center sm:text-left border-l border-brand-dark/10 pl-4 sm:pl-6">
+                            <div class="w-12 h-12 rounded-full bg-brand-dark/5 flex items-center justify-center text-brand-dark mx-auto sm:mx-0">
+                                <i class="fa-regular fa-comments text-xl text-brand-dark/80"></i>
+                            </div>
+                            <h3 class="font-cormorant text-xl font-bold tracking-widest uppercase">DISCUSS</h3>
+                            <p class="font-montserrat text-xs text-brand-dark/70 leading-relaxed font-light">
+                                We share opinions, ask questions and embrace all feels.
+                            </p>
+                        </div>
+
+                        <!-- Pillar 3: CONNECT -->
+                        <div class="space-y-3 text-center sm:text-left border-l border-brand-dark/10 pl-4 sm:pl-6">
+                            <div class="w-12 h-12 rounded-full bg-brand-dark/5 flex items-center justify-center text-brand-dark mx-auto sm:mx-0">
+                                <i class="fa-solid fa-people-group text-xl text-brand-dark/80"></i>
+                            </div>
+                            <h3 class="font-cormorant text-xl font-bold tracking-widest uppercase">CONNECT</h3>
+                            <p class="font-montserrat text-xs text-brand-dark/70 leading-relaxed font-light">
+                                We build friendships that go beyond the last page.
+                            </p>
+                        </div>
+
+                        <!-- Circular Stamp Seal Graphic (Far Right Corner Accent) -->
+                        <div class="hidden xl:block absolute -right-12 -top-12 opacity-80 pointer-events-none">
+                            <div class="w-28 h-28 border-2 border-dashed border-brand-dark/30 rounded-full flex items-center justify-center stamp-rotate">
+                                <span class="font-cinzel text-[8px] tracking-[0.25em] text-brand-dark/60 font-bold uppercase text-center px-2">
+                                    • FRIENDS • PEOPLE • STORIES
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SECTION -->
+    <footer id="join" class="bg-brand-dark pt-12 pb-16 px-4 sm:px-6 lg:px-8 border-t border-brand-gold/10">
+        <div class="max-w-7xl mx-auto space-y-12">
+            
+            <!-- Central Quote Box -->
+            <div class="text-center space-y-4 max-w-2xl mx-auto">
+                <span class="font-cormorant text-6xl text-brand-gold/40 block leading-none select-none">“</span>
+                <p class="font-cormorant italic text-2xl sm:text-3xl text-parchment leading-snug -mt-8">
+                    We don't just read books.<br/>
+                    We travel routes written in ink.
+                </p>
+            </div>
+
+            <!-- Footer Bottom Nav Grid -->
+            <div class="flex flex-col md:flex-row items-center justify-between border-t border-brand-gold/15 pt-8 space-y-6 md:space-y-0">
+                
+                <!-- Left Logo -->
+                <div class="flex items-center space-x-3">
+                    <svg class="w-7 h-7 text-brand-gold fill-current" viewBox="0 0 100 100">
+                        <path d="M48,15 C52,15 57,18 62,20 C67,22 72,20 75,25 C78,30 73,35 76,40 C79,45 85,48 82,55 C79,62 72,65 70,72 C68,79 60,82 55,88 C50,94 45,90 42,85 C39,80 38,72 35,68 C32,64 25,62 24,56 C23,50 30,46 31,40 C32,34 28,30 30,24 C32,18 44,15 48,15 Z" />
+                    </svg>
+                    <span class="font-cinzel tracking-[0.25em] text-sm text-brand-gold font-bold">INKROUTE AFRICA</span>
+                </div>
+
+                <!-- Copyright -->
+                <p class="font-montserrat text-xs text-slate-400 font-light text-center">
+                    &copy; 2024 InkRoute Africa Book Club. All rights reserved.
+                </p>
+
+                <!-- Social Icons -->
+                <div class="flex items-center space-x-6 text-brand-gold text-lg">
+                    <a href="#" title="Instagram" class="hover:text-brand-gold-light transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" title="Twitter" class="hover:text-brand-gold-light transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" title="Email Us" class="hover:text-brand-gold-light transition-colors"><i class="fa-regular fa-envelope"></i></a>
+                </div>
+
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- MODALS & POPUPS -->
+
+    <!-- 1. Join The Club Modal -->
+    <div id="joinModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-parchment-light text-brand-dark rounded-2xl max-w-md w-full p-8 relative shadow-2xl border border-brand-gold/40">
+            <button onclick="closeModal('joinModal')" class="absolute top-4 right-4 text-brand-dark/60 hover:text-brand-dark text-xl font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center space-y-2 mb-6">
+                <span class="font-script text-3xl text-brand-gold">welcome to</span>
+                <h3 class="font-cormorant text-3xl font-bold tracking-wider uppercase">INKROUTE AFRICA</h3>
+                <p class="font-montserrat text-xs text-brand-dark/70">Fill in your details to join our monthly reading circles.</p>
+            </div>
+            <form onsubmit="handleJoinSubmit(event)" class="space-y-4 font-montserrat text-xs">
+                <div>
+                    <label class="block font-semibold mb-1 text-brand-dark/80 uppercase tracking-wider text-[10px]">Full Name</label>
+                    <input type="text" required placeholder="e.g. Amara Okafor" class="w-full px-4 py-3 rounded-lg bg-parchment border border-brand-dark/20 focus:outline-none focus:border-brand-burgundy">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-brand-dark/80 uppercase tracking-wider text-[10px]">Email Address</label>
+                    <input type="email" required placeholder="amara@example.com" class="w-full px-4 py-3 rounded-lg bg-parchment border border-brand-dark/20 focus:outline-none focus:border-brand-burgundy">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-brand-dark/80 uppercase tracking-wider text-[10px]">Favorite Genre</label>
+                    <select class="w-full px-4 py-3 rounded-lg bg-parchment border border-brand-dark/20 focus:outline-none focus:border-brand-burgundy">
+                        <option>Romance</option>
+                        <option>Thriller & Mystery</option>
+                        <option>African Literary Fiction</option>
+                        <option>Fantasy & Sci-Fi</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-brand-burgundy hover:bg-brand-burgundy-hover text-parchment-light py-3.5 rounded-lg font-bold tracking-widest uppercase transition-all shadow-md">
+                    SUBMIT REGISTRATION
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Current Read Book Details Modal -->
+    <div id="currentReadModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-parchment-light text-brand-dark rounded-2xl max-w-2xl w-full p-6 sm:p-8 relative shadow-2xl border border-brand-gold/40 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('currentReadModal')" class="absolute top-4 right-4 text-brand-dark/60 hover:text-brand-dark text-xl font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex flex-col sm:flex-row gap-6">
+                <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1647895180i/60052003.jpg" onerror="this.src='https://placehold.co/300x450/6e2020/ffffff?text=Things+We+Never+Got+Over'" class="w-40 rounded-lg shadow-md mx-auto sm:mx-0 object-cover">
+                <div class="space-y-3">
+                    <span class="font-montserrat text-[10px] font-bold tracking-widest text-brand-burgundy uppercase">MAY 2024 SELECTION</span>
+                    <h3 class="font-cormorant text-3xl font-bold">Things We Never Got Over</h3>
+                    <p class="font-cormorant italic text-sm text-brand-gold-light font-bold">Lucy Score</p>
+                    <p class="font-montserrat text-xs leading-relaxed text-brand-dark/80">
+                        Beard, bad attitude, and a secret heart of gold. Knox prefers his life like he prefers his coffee: Alone. Until Naomi turns his world upside down with a runaway bride escape and an unexpected niece.
+                    </p>
+                    <div class="border-t border-brand-dark/10 pt-3 space-y-2">
+                        <h4 class="font-montserrat text-xs font-bold uppercase tracking-wider text-brand-dark">Discussion Schedule:</h4>
+                        <ul class="font-montserrat text-xs space-y-1 text-brand-dark/70">
+                            <li>• <strong>May 10:</strong> Chapters 1–15 (Online Discord)</li>
+                            <li>• <strong>May 18:</strong> Chapters 16–30 (Zoom Live)</li>
+                            <li>• <strong>May 25:</strong> Final Verdict & Meetup</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Dynamic Book Detail Modal -->
+    <div id="bookDetailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-parchment-light text-brand-dark rounded-2xl max-w-xl w-full p-6 sm:p-8 relative shadow-2xl border border-brand-gold/40">
+            <button onclick="closeModal('bookDetailModal')" class="absolute top-4 right-4 text-brand-dark/60 hover:text-brand-dark text-xl font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modalBookContent" class="space-y-4">
+                <!-- Content injected dynamically via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Our Story Modal -->
+    <div id="storyModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-parchment-light text-brand-dark rounded-2xl max-w-xl w-full p-8 relative shadow-2xl border border-brand-gold/40">
+            <button onclick="closeModal('storyModal')" class="absolute top-4 right-4 text-brand-dark/60 hover:text-brand-dark text-xl font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="space-y-4">
+                <span class="font-script text-3xl text-brand-gold">about</span>
+                <h3 class="font-cormorant text-3xl font-bold uppercase tracking-wider">OUR STORY</h3>
+                <p class="font-montserrat text-xs leading-relaxed text-brand-dark/80">
+                    InkRoute Africa was founded in 2021 by a group of passionate readers who wanted to celebrate diverse narratives, classic African literature, and worldwide bestsellers under one warm umbrella.
+                </p>
+                <p class="font-montserrat text-xs leading-relaxed text-brand-dark/80">
+                    What started as a 5-person coffee shop club has now grown into a vibrant online and offline community spanning over 12 countries.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-brand-gold text-brand-dark px-6 py-3 rounded-xl shadow-2xl font-montserrat text-xs font-bold tracking-wider hidden z-50 transition-all transform translate-y-4">
+        Message Notification
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Book Catalog Data
+        const booksData = [
+            {
+                title: "FALLEN",
+                author: "Esther Grace Kimotho",
+                genre: "ROMANCE",
+                rating: 5,
+                <img src="fallen-cover.png" alt="Fallen" class="book-cover">
+
+                synopsis: "A fake-dating rom-com set against a picturesque wedding in Spain. Catalina Martin desperately needs a date to her sister's wedding—and her infuriating coworker Aaron Blackford offers to step in."
+            },
+            {
+                title: "THE SILENT PATIENT",
+                author: "Alex Michaelides",
+                genre: "THRILLER",
+                rating: 5,
+                cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1582759968i/40092410.jpg",
+                synopsis: "Alicia Berenson’s life is seemingly perfect. Then one evening she shoots her husband five times in the face, and never speaks another word."
+            },
+            {
+                title: "It Ends With Us",
+                author: "Colleen Hoover",
+                genre: "ROMANCE",
+                rating: 5,
+                cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1688011937i/27362503.jpg",
+                synopsis: "A heartbreaking story of love, resilience, and tough choices. Lily hasn't always had it easy, but that's never stopped her from working hard for the life she wants."
+            },
+            {
+                title: "FOURTH WING",
+                author: "Rebecca Yarros",
+                genre: "FANTASY",
+                rating: 5,
+                cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1701980900i/61714586.jpg",
+                synopsis: "Enter the brutal and elite world of a war college for dragon riders where the only rule is: graduate or die."
+            },
+            {
+                title: "Homegoing",
+                author: "Yaa Gyasi",
+                genre: "LITERARY",
+                rating: 5,
+                cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1448824210i/27071490.jpg",
+                synopsis: "A novel tracing the descendants of two half-sisters born in Ghana in the eighteenth century, spanning generations across Africa and America."
+            }
+        ];
+
+        // Horizontal Scroll Controls for Bookshelf
+        const booksContainer = document.getElementById('booksContainer');
+        document.getElementById('scrollLeftBtn').addEventListener('click', () => {
+            booksContainer.scrollBy({ left: -280, behavior: 'smooth' });
+        });
+        document.getElementById('scrollRightBtn').addEventListener('click', () => {
+            booksContainer.scrollBy({ left: 280, behavior: 'smooth' });
+        });
+
+        // Filter Books by Genre
+        function filterBooks(genre) {
+            const cards = document.querySelectorAll('.book-card');
+            const btns = document.querySelectorAll('.genre-btn');
+
+            btns.forEach(btn => {
+                if(btn.innerText.toUpperCase() === genre) {
+                    btn.classList.add('bg-brand-gold', 'text-brand-dark');
+                    btn.classList.remove('bg-brand-dark-surface', 'text-slate-300');
+                } else {
+                    btn.classList.remove('bg-brand-gold', 'text-brand-dark');
+                    btn.classList.add('bg-brand-dark-surface', 'text-slate-300');
+                }
+            });
+
+            cards.forEach(card => {
+                if (genre === 'ALL' || card.dataset.genre === genre) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Modal Handlers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function openCurrentReadModal() {
+            openModal('currentReadModal');
+        }
+
+        function openBookModal(index) {
+            const book = booksData[index];
+            const content = `
+                <div class="flex flex-col sm:flex-row gap-6">
+                    <img src="${book.cover}" onerror="this.src='https://placehold.co/300x450/1a1a1a/ffffff?text=Book+Cover'" class="w-36 rounded-lg shadow-lg mx-auto sm:mx-0 object-cover">
+                    <div class="space-y-3">
+                        <span class="font-montserrat text-[10px] font-bold tracking-widest text-brand-burgundy uppercase">${book.genre}</span>
+                        <h3 class="font-cormorant text-2xl font-bold">${book.title}</h3>
+                        <p class="font-cormorant italic text-sm text-brand-gold-light font-bold">by ${book.author}</p>
+                        <p class="font-montserrat text-xs leading-relaxed text-brand-dark/80">${book.synopsis}</p>
+                        <div class="pt-2">
+                            <button onclick="showToast('Added to your personal reading list!')" class="bg-brand-dark text-parchment-light px-5 py-2.5 rounded-full text-xs font-montserrat font-bold tracking-wider uppercase">
+                                ADD TO MY LIST
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modalBookContent').innerHTML = content;
+            openModal('bookDetailModal');
+        }
+
+        function handleJoinSubmit(e) {
+            e.preventDefault();
+            closeModal('joinModal');
+            showToast('✨ Welcome to InkRoute Africa! Check your inbox for updates.');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('hidden', 'translate-y-4');
+            setTimeout(() => {
+                toast.classList.add('hidden', 'translate-y-4');
+            }, 3500);
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Atmosphere Light/Dark Subtle Toggle
+        let darkGlow = true;
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            darkGlow = !darkGlow;
+            showToast(darkGlow ? 'Atmospheric dark mode active' : 'Warm ambient mode active');
+        });
+
+        // Ambient Particles Animation Canvas
+        const canvas = document.getElementById('ambient-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * -0.3 - 0.1;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.x < 0 || this.x > canvas.width) this.x = Math.random() * canvas.width;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(197, 160, 89, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.onload = function() {
+            animateParticles();
+        };
+    </script>
+</body>
+</html>
